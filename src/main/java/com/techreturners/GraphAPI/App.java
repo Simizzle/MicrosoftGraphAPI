@@ -1,9 +1,12 @@
 package com.techreturners.GraphAPI;
 
+import com.microsoft.graph.models.Calendar;
 import com.microsoft.graph.models.Message;
 import com.microsoft.graph.models.User;
+import com.microsoft.graph.requests.CalendarCollectionPage;
 import com.microsoft.graph.requests.MessageCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
+import com.microsoft.graph.security.models.Case;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -47,7 +50,8 @@ public class App {
 			System.out.println("2. List my inbox");
 			System.out.println("3. Send mail");
 			System.out.println("4. List users (required app-only)");
-			System.out.println("5. Make a Graph call");
+			System.out.println("5. List calendars");
+			System.out.println("6. Make a Graph call");
 
 			try {
 				choice = input.nextInt();
@@ -80,6 +84,9 @@ public class App {
 					listUsers();
 					break;
 				case 5:
+					listCalendars();
+					break;
+				case 6:
 					// Run any Graph code
 					makeGraphCall();
 					break;
@@ -205,4 +212,16 @@ public class App {
 		}
 	}
 	// </MakeGraphCallSnippet>
+
+	private static void listCalendars() {
+		try {
+			final CalendarCollectionPage calendars = Graph.getListOfCalendars();
+			for (Calendar calendarCollectionPage : calendars.getCurrentPage()) {
+				System.out.println(calendarCollectionPage.name);
+			};
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
 }

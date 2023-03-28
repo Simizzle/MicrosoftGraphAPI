@@ -5,6 +5,7 @@ import com.azure.core.credential.TokenRequestContext;
 import com.azure.identity.*;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
 import com.microsoft.graph.models.*;
+import com.microsoft.graph.requests.CalendarCollectionPage;
 import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.MessageCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
@@ -30,6 +31,7 @@ public class Graph { // <UserAuthConfigSnippet>
 
         final String clientId = properties.getProperty("app.clientId");
         final String authTenantId = properties.getProperty("app.authTenant");
+        final String clientSecret = properties.getProperty("app.clientSecret");
         final List<String> graphUserScopes = Arrays
                 .asList(properties.getProperty("app.graphUserScopes").split(","));
 
@@ -45,6 +47,7 @@ public class Graph { // <UserAuthConfigSnippet>
         _userClient = GraphServiceClient.builder()
                 .authenticationProvider(authProvider)
                 .buildClient();
+
     }
     // </UserAuthConfigSnippet>
 
@@ -181,4 +184,13 @@ public class Graph { // <UserAuthConfigSnippet>
         // ensureGraphForAppOnlyAuth();
     }
     // </MakeGraphCallSnippet>
+
+    public static CalendarCollectionPage getListOfCalendars() {
+//        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
+
+        return _userClient.me().calendars()
+                .buildRequest()
+                .get();
+    }
+
 }
