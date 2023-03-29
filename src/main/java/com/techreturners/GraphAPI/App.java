@@ -217,7 +217,7 @@ public class App {
 		try {
 			final CalendarCollectionPage calendars = Graph.getListOfCalendars();
 			for (Calendar calendarCollectionPage : calendars.getCurrentPage()) {
-				System.out.println(calendarCollectionPage.name);
+				System.out.println(calendarCollectionPage.name + " " + calendarCollectionPage.id);
 			};
 
 		} catch (Exception e) {

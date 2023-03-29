@@ -10,12 +10,15 @@ import com.microsoft.graph.requests.GraphServiceClient;
 import com.microsoft.graph.requests.MessageCollectionPage;
 import com.microsoft.graph.requests.UserCollectionPage;
 import okhttp3.Request;
+import org.springframework.stereotype.Service;
 
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
 
+@Service
 public class Graph { // <UserAuthConfigSnippet>
     private static Properties _properties;
     private static DeviceCodeCredential _deviceCodeCredential;
@@ -185,12 +188,14 @@ public class Graph { // <UserAuthConfigSnippet>
     }
     // </MakeGraphCallSnippet>
 
-    public static CalendarCollectionPage getListOfCalendars() {
+    public static CalendarCollectionPage getListOfCalendars() throws GeneralSecurityException {
 //        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
 
-        return _userClient.me().calendars()
-                .buildRequest()
-                .get();
+        if(_userClient == null) {
+            throw new GeneralSecurityException();
+        }
+            return _userClient.me().calendars()
+                    .buildRequest()
+                    .get();
     }
-
 }
