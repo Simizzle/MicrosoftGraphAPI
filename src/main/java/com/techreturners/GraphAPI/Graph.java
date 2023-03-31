@@ -1,19 +1,18 @@
 package com.techreturners.GraphAPI;
 
-import com.azure.core.credential.AccessToken;
-import com.azure.core.credential.TokenRequestContext;
 import com.azure.identity.*;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
-import com.microsoft.graph.models.*;
+import com.microsoft.graph.options.Option;
+import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.CalendarCollectionPage;
+import com.microsoft.graph.requests.EventCollectionPage;
 import com.microsoft.graph.requests.GraphServiceClient;
-import com.microsoft.graph.requests.MessageCollectionPage;
-import com.microsoft.graph.requests.UserCollectionPage;
 import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
@@ -25,7 +24,6 @@ public class Graph { // <UserAuthConfigSnippet>
     private static GraphServiceClient<Request> _userClient;
 
     public static void initializeGraphForUserAuth(Properties properties, Consumer<DeviceCodeInfo> challenge) throws Exception {
-        // Ensure properties isn't null
         if (properties == null) {
             throw new Exception("Properties cannot be null");
         }
@@ -54,89 +52,11 @@ public class Graph { // <UserAuthConfigSnippet>
     }
     // </UserAuthConfigSnippet>
 
-    // <GetUserTokenSnippet>
-    public static String getUserToken() throws Exception {
-        // Ensure credential isn't null
-        if (_deviceCodeCredential == null) {
-            throw new Exception("Graph has not been initialized for user auth");
-        }
-
-        final String[] graphUserScopes = _properties.getProperty("app.graphUserScopes").split(",");
-
-        final TokenRequestContext context = new TokenRequestContext();
-        context.addScopes(graphUserScopes);
-
-        final AccessToken token = _deviceCodeCredential.getToken(context).block();
-        return token.getToken();
-    }
-    // </GetUserTokenSnippet>
-
-    // <GetUserSnippet>
-    public static User getUser() throws Exception {
-        // Ensure client isn't null
-        if (_userClient == null) {
-            throw new Exception("Graph has not been initialized for user auth");
-        }
-
-        return _userClient.me()
-                .buildRequest()
-                .select("displayName,mail,userPrincipalName")
-                .get();
-    }
-    // </GetUserSnippet>
-
-    // <GetInboxSnippet>
-    public static MessageCollectionPage getInbox() throws Exception {
-        // Ensure client isn't null
-        if (_userClient == null) {
-            throw new Exception("Graph has not been initialized for user auth");
-        }
-
-        return _userClient.me()
-                .mailFolders("inbox")
-                .messages()
-                .buildRequest()
-                .select("from,isRead,receivedDateTime,subject")
-                .top(25)
-                .orderBy("receivedDateTime DESC")
-                .get();
-    }
-    // </GetInboxSnippet>
-
-    // <SendMailSnippet>
-    public static void sendMail(String subject, String body, String recipient) throws Exception {
-        // Ensure client isn't null
-        if (_userClient == null) {
-            throw new Exception("Graph has not been initialized for user auth");
-        }
-
-        // Create a new message
-        final Message message = new Message();
-        message.subject = subject;
-        message.body = new ItemBody();
-        message.body.content = body;
-        message.body.contentType = BodyType.TEXT;
-
-        final Recipient toRecipient = new Recipient();
-        toRecipient.emailAddress = new EmailAddress();
-        toRecipient.emailAddress.address = recipient;
-        message.toRecipients = List.of(toRecipient);
-
-        // Send the message
-        _userClient.me()
-                .sendMail(UserSendMailParameterSet.newBuilder()
-                        .withMessage(message)
-                        .build())
-                .buildRequest()
-                .post();
-    }
-    // </SendMailSnippet>
-
     // <AppOnyAuthConfigSnippet>
     private static ClientSecretCredential _clientSecretCredential;
     private static GraphServiceClient<Request> _appClient;
 
-    private static void ensureGraphForAppOnlyAuth() throws Exception {
+    public static void ensureGraphForAppOnlyAuth() throws Exception {
         // Ensure _properties isn't null
         if (_properties == null) {
             throw new Exception("Properties cannot be null");
@@ -157,7 +77,7 @@ public class Graph { // <UserAuthConfigSnippet>
         if (_appClient == null) {
             final TokenCredentialAuthProvider authProvider =
                     new TokenCredentialAuthProvider(
-                            List.of("https://graph.microsoft.com/.default"), _clientSecretCredential);
+                            List.of("http://graph.microsoft.com/.default"), _clientSecretCredential);
 
             _appClient = GraphServiceClient.builder()
                     .authenticationProvider(authProvider)
@@ -165,19 +85,6 @@ public class Graph { // <UserAuthConfigSnippet>
         }
     }
     // </AppOnyAuthConfigSnippet>
-
-    // <GetUsersSnippet>
-    public static UserCollectionPage getUsers() throws Exception {
-        ensureGraphForAppOnlyAuth();
-
-        return _appClient.users()
-                .buildRequest()
-                .select("displayName,id,mail")
-                .top(25)
-                .orderBy("displayName")
-                .get();
-    }
-    // </GetUsersSnippet>
 
     // <MakeGraphCallSnippet>
     public static void makeGraphCall() {
@@ -191,11 +98,26 @@ public class Graph { // <UserAuthConfigSnippet>
     public static CalendarCollectionPage getListOfCalendars() throws GeneralSecurityException {
 //        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
 
-        if(_userClient == null) {
+        if (_userClient == null) {
             throw new GeneralSecurityException();
         }
-            return _userClient.me().calendars()
-                    .buildRequest()
-                    .get();
+        return _userClient.me().calendars()
+                .buildRequest().top(100)
+                .get();
+    }
+
+    public static EventCollectionPage getCalendarEvents() throws GeneralSecurityException {
+
+        LinkedList<Option> requestOptions = new LinkedList<>();
+        requestOptions.add(new QueryOption("name", "2023-01 Java"));
+
+        if (_userClient == null) {
+            throw new GeneralSecurityException();
+        }
+        return _userClient.me().calendar().events()
+                .buildRequest(requestOptions)
+//                .select("id, subject, start, end")
+                .top(100)
+                .get();
     }
 }

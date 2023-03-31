@@ -1,6 +1,7 @@
 package com.techreturners.GraphAPI.controllers;
 
 import com.microsoft.graph.requests.CalendarCollectionPage;
+import com.microsoft.graph.requests.EventCollectionPage;
 import com.techreturners.GraphAPI.Graph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,11 @@ public class MSGraphController {
     @GetMapping("/")
     public CalendarCollectionPage getCalendarList() throws GeneralSecurityException {
         return Graph.getListOfCalendars();
+    }
+
+    @GetMapping("/events")
+    public EventCollectionPage getCalendarEvents() throws GeneralSecurityException {
+        return Graph.getCalendarEvents();
     }
 
 }
