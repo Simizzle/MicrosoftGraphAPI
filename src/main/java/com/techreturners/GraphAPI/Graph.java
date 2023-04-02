@@ -2,6 +2,7 @@ package com.techreturners.GraphAPI;
 
 import com.azure.identity.*;
 import com.microsoft.graph.authentication.TokenCredentialAuthProvider;
+import com.microsoft.graph.models.DateTimeTimeZone;
 import com.microsoft.graph.options.Option;
 import com.microsoft.graph.options.QueryOption;
 import com.microsoft.graph.requests.CalendarCollectionPage;
@@ -11,10 +12,7 @@ import okhttp3.Request;
 import org.springframework.stereotype.Service;
 
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Consumer;
 
 @Service
@@ -89,15 +87,13 @@ public class Graph {
     }
 
     public static EventCollectionPage getCalendarEvents(String calendarId) throws GeneralSecurityException {
-
-        LinkedList<Option> requestOptions = new LinkedList<>();
-        requestOptions.add(new QueryOption("name", "2023-01 Java"));
         if (_userClient == null) {
             throw new GeneralSecurityException();
         }
         return _userClient.me().calendars().byId(calendarId).events()
-                .buildRequest(requestOptions)
+                .buildRequest()
                 .select("id,subject,start,end,bodyPreview,location")
+                .orderBy("start/dateTime asc")
                 .top(100)
                 .get();
     }
