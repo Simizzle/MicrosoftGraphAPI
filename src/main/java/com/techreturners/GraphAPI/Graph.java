@@ -18,7 +18,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 
 @Service
-public class Graph { // <UserAuthConfigSnippet>
+public class Graph {
     private static Properties _properties;
     private static DeviceCodeCredential _deviceCodeCredential;
     private static GraphServiceClient<Request> _userClient;
@@ -48,20 +48,15 @@ public class Graph { // <UserAuthConfigSnippet>
         _userClient = GraphServiceClient.builder()
                 .authenticationProvider(authProvider)
                 .buildClient();
-
     }
-    // </UserAuthConfigSnippet>
 
-    // <AppOnyAuthConfigSnippet>
     private static ClientSecretCredential _clientSecretCredential;
     private static GraphServiceClient<Request> _appClient;
 
     public static void ensureGraphForAppOnlyAuth() throws Exception {
-        // Ensure _properties isn't null
         if (_properties == null) {
             throw new Exception("Properties cannot be null");
         }
-
         if (_clientSecretCredential == null) {
             final String clientId = _properties.getProperty("app.clientId");
             final String tenantId = _properties.getProperty("app.tenantId");
@@ -73,7 +68,6 @@ public class Graph { // <UserAuthConfigSnippet>
                     .clientSecret(clientSecret)
                     .build();
         }
-
         if (_appClient == null) {
             final TokenCredentialAuthProvider authProvider =
                     new TokenCredentialAuthProvider(
@@ -84,20 +78,8 @@ public class Graph { // <UserAuthConfigSnippet>
                     .buildClient();
         }
     }
-    // </AppOnyAuthConfigSnippet>
-
-    // <MakeGraphCallSnippet>
-    public static void makeGraphCall() {
-        // INSERT YOUR CODE HERE
-        // Note: if using _appClient, be sure to call ensureGraphForAppOnlyAuth
-        // before using it.
-        // ensureGraphForAppOnlyAuth();
-    }
-    // </MakeGraphCallSnippet>
 
     public static CalendarCollectionPage getListOfCalendars() throws GeneralSecurityException {
-//        GraphServiceClient graphClient = GraphServiceClient.builder().authenticationProvider( authProvider ).buildClient();
-
         if (_userClient == null) {
             throw new GeneralSecurityException();
         }
@@ -106,17 +88,16 @@ public class Graph { // <UserAuthConfigSnippet>
                 .get();
     }
 
-    public static EventCollectionPage getCalendarEvents() throws GeneralSecurityException {
+    public static EventCollectionPage getCalendarEvents(String calendarId) throws GeneralSecurityException {
 
         LinkedList<Option> requestOptions = new LinkedList<>();
         requestOptions.add(new QueryOption("name", "2023-01 Java"));
-
         if (_userClient == null) {
             throw new GeneralSecurityException();
         }
-        return _userClient.me().calendar().events()
+        return _userClient.me().calendars().byId(calendarId).events()
                 .buildRequest(requestOptions)
-//                .select("id, subject, start, end")
+                .select("id,subject,start,end,bodyPreview,location")
                 .top(100)
                 .get();
     }
