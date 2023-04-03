@@ -77,7 +77,7 @@ public class Graph {
         }
     }
 
-    public static CalendarCollectionPage getListOfCalendars() throws GeneralSecurityException {
+    public static CalendarCollectionPage getListOfCalendars() throws Exception {
         if (_userClient == null) {
             throw new GeneralSecurityException();
         }
@@ -86,7 +86,7 @@ public class Graph {
                 .get();
     }
 
-    public static EventCollectionPage getCalendarEvents(String calendarId) throws GeneralSecurityException {
+    public static EventCollectionPage getCalendarEvents(String calendarId) throws Exception {
         if (_userClient == null) {
             throw new GeneralSecurityException();
         }

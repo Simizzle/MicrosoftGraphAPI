@@ -18,12 +18,12 @@ public class MSGraphController {
     Graph graph;
 
     @GetMapping("/")
-    public CalendarCollectionPage getCalendarList() throws GeneralSecurityException {
+    public CalendarCollectionPage getCalendarList() throws Exception {
         return Graph.getListOfCalendars();
     }
 
     @GetMapping("/events/{calendarId}")
-    public EventCollectionPage getCalendarEvents(@PathVariable("calendarId") String calendarId) throws GeneralSecurityException {
+    public EventCollectionPage getCalendarEvents(@PathVariable("calendarId") String calendarId) throws Exception {
         return Graph.getCalendarEvents(calendarId);
     }
 }
